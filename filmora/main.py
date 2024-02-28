@@ -4,5 +4,5 @@ app = FastAPI()
 
 
 @app.get("/")
-def health_check():
-    return {"status": "I am alive"}
+def check_health():
+    return {"status": "I am alive!"}
