@@ -8,13 +8,13 @@ ENV\
     POETRY_VITRUALENV_IN_PROJECT=false\
     POETRY_NO_INTERACTION=1\
     POETRY_VERSION=1.8.1
-    
+
 WORKDIR /app
 
 COPY poetry.lock pyproject.toml ./
 
-COPY filmora ./filmora
+COPY sameer ./sameer
 
 RUN poetry install
 
-ENTRYPOINT [ "uvicorn", "filmora.main:app", "--host", "0.0.0.0", "--port", "80"]
+ENTRYPOINT [ "uvicorn", "sameer.main:app", "--host", "0.0.0.0", "--port", "80"]

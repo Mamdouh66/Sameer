@@ -1,8 +1,8 @@
 services:
   app:
     build: .
-    container_name: filmora
-    command: uvicorn filmora.main:app --host 0.0.0.0 --port 80 --reload --reload-include *
+    container_name: sameer
+    command: uvicorn sameer.main:app --host 0.0.0.0 --port 80 --reload --reload-include *
     ports:
       - 8000:80
     volumes:
