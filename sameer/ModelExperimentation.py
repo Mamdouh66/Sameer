@@ -50,3 +50,45 @@ def calculate_user_item_mean_rating(
     ) / 2
 
     return test_df
+
+
+def calculate_weighted_mean_ratings(test_df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Calculates the weighted mean ratings for a given DataFrame.
+    This model employs a weighted average of the user mean and item mean ratings.
+    The weight ( w ) can be adjusted based on domain understanding.
+
+    The formula is :
+    prediction = w * User Mean Rating + (1 - w) * Item Mean Rating, where 0 <= w <= 1
+
+    Args:
+        test_df (pd.DataFrame): The DataFrame containing the necessary columns:
+            - user_mean_rating: The mean rating for each user.
+            - item_mean_rating: The mean rating for each item.
+            - rating: The actual rating.
+
+    Returns:
+        pd.DataFrame: The DataFrame with an additional column 'weighted_mean_rating',
+        which contains the calculated weighted mean ratings.
+
+    """
+
+    best_rmse = float("inf")
+    best_w = 0
+
+    for w in [i * 0.1 for i in range(11)]:
+        test_df["weighted_mean_rating_tmp"] = (
+            w * test_df["user_mean_rating"] + (1 - w) * test_df["item_mean_rating"]
+        )
+        rmse = calculate_rmse(test_df["rating"], test_df["weighted_mean_rating_tmp"])
+
+        if rmse < best_rmse:
+            best_rmse = rmse
+            best_w = w
+
+    test_df["weighted_mean_rating"] = (
+        best_w * test_df["user_mean_rating"]
+        + (1 - best_w) * test_df["item_mean_rating"]
+    )
+    test_df = test_df.drop(columns=["weighted_mean_rating_tmp"])
+    return test_df
