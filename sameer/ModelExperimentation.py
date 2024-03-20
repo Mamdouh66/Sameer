@@ -52,7 +52,9 @@ def calculate_user_item_mean_rating(
     return test_df
 
 
-def calculate_weighted_mean_ratings(test_df: pd.DataFrame) -> pd.DataFrame:
+def calculate_weighted_mean_ratings(
+    test_df: pd.DataFrame,
+) -> tuple[pd.DataFrame, float, float]:
     """
     Calculates the weighted mean ratings for a given DataFrame.
     This model employs a weighted average of the user mean and item mean ratings.
@@ -68,8 +70,10 @@ def calculate_weighted_mean_ratings(test_df: pd.DataFrame) -> pd.DataFrame:
             - rating: The actual rating.
 
     Returns:
-        pd.DataFrame: The DataFrame with an additional column 'weighted_mean_rating',
-        which contains the calculated weighted mean ratings.
+        tuple[pd.DataFrame, float, float]: A tuple containing the following:
+            - test_df (pd.DataFrame): The updated DataFrame with the calculated weighted mean ratings.
+            - best_w (float): The best weight value that resulted in the lowest RMSE.
+            - best_rmse (float): The lowest RMSE achieved.
 
     """
 
@@ -91,4 +95,5 @@ def calculate_weighted_mean_ratings(test_df: pd.DataFrame) -> pd.DataFrame:
         + (1 - best_w) * test_df["item_mean_rating"]
     )
     test_df = test_df.drop(columns=["weighted_mean_rating_tmp"])
-    return test_df
+
+    return test_df, best_w, best_rmse
