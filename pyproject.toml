@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sameer"
-version = "0.1.0"
+version = "0.1.1"
 description = ""
 authors = ["Mamdouh"]
 license = "MIT"
@@ -8,16 +8,15 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-numpy = "^1.26.4"
-pandas = "^2.2.1"
-scikit-learn = "^1.4.1.post1"
-matplotlib = "^3.8.3"
-polars = "^0.20.10"
 altair = "^5.2.0"
 pre-commit = "^3.6.2"
 seaborn = "^0.13.2"
 fastapi = {extras = ["all"], version = "^0.110.0"}
 uvicorn = {extras = ["standard"], version = "^0.27.1"}
+numpy = "^1.26.4"
+pandas = "^2.2.1"
+scikit-learn = "^1.4.1.post1"
+matplotlib = "^3.8.3"
 
 
 [build-system]
