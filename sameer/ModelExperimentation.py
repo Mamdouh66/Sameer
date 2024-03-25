@@ -1,8 +1,11 @@
+import pickle
 import pandas as pd
+import numpy as np
 
 from math import sqrt
 
 from sklearn.metrics import mean_squared_error
+from surprise import Reader, Dataset, AlgoBase
 
 
 def calculate_rmse(y_true: pd.Series, y_pred: pd.Series) -> float:
@@ -97,3 +100,119 @@ def calculate_weighted_mean_ratings(
     test_df = test_df.drop(columns=["weighted_mean_rating_tmp"])
 
     return test_df, best_w, best_rmse
+
+
+def load_data_into_surprise(
+    train_df: pd.DataFrame, test_df: pd.DataFrame, reader: Reader
+) -> tuple:
+    """
+    Loads the train and test data into Surprise Dataset objects.
+
+    Parameters:
+    train_df (pandas.DataFrame): The training set DataFrame containing userId, movieId, and rating columns.
+    test_df (pandas.DataFrame): The test set DataFrame containing userId, movieId, and rating columns.
+
+    Returns:
+    tuple: A tuple containing the following:
+        - trainset (surprise.Trainset): The training set in Surprise Dataset format.
+        - testset (list): The test set in Surprise Dataset format.
+    """
+    train_data = Dataset.load_from_df(train_df, reader)
+    test_data = Dataset.load_from_df(test_df, reader)
+
+    trainset = train_data.build_full_trainset()
+    testset = test_data.build_full_trainset().build_testset()
+
+    return trainset, testset
+
+
+def load_pickle_model(model_path: str) -> object:
+    """
+    Loads a pickled model from the specified path.
+
+    Parameters:
+    model_path (str): The path to the pickled model file.
+
+    Returns:
+    object: The loaded model object.
+    """
+    with open(model_path, "rb") as file:
+        model = pickle.load(file)
+
+    return model
+
+
+def get_collaborative_rating(userId: int, movieId: int, model: AlgoBase):
+    return model.predict(userId, movieId).est
+
+
+def get_content_based_rating(
+    userId: int,
+    movieId: int,
+    matrix_similarity: np.ndarray,
+    movies_df: pd.DataFrame,
+    model: AlgoBase,
+):
+    """
+    Calculate the content-based rating for a given user and movie.
+
+    Args:
+        userId (int): The ID of the user.
+        movieId (int): The ID of the movie.
+        matrix_similarity (np.ndarray): The cosine similarity matrix.
+        movies_df (pd.DataFrame): The DataFrame containing movie information.
+        model (AlgoBase): The collaborative filtering model.
+
+    Returns:
+        float: The content-based rating for the user and movie.
+    """
+    sim_scores = sorted(
+        list(enumerate(matrix_similarity[movieId])), key=lambda x: x[1], reverse=True
+    )[1:11]
+    movie_indices = [i[0] for i in sim_scores]
+    similar_movies = movies_df.iloc[movie_indices]
+    similar_movies["est"] = similar_movies["id"].apply(
+        lambda x: model.predict(userId, x).est
+    )
+    return similar_movies["est"].mean()
+
+
+def get_weighted_score(
+    movieId: int, movies_df: pd.DataFrame, weighted_df: pd.DataFrame
+):
+    return weighted_df.loc[movies_df.loc[movieId, "id"], "score"]
+
+
+def hybrid_predicted_rating(
+    userId: int,
+    movieId: int,
+    model: AlgoBase,
+    similarity_matrix: np.ndarray,
+    movies_df: pd.DataFrame,
+    weighted_df: pd.DataFrame,
+):
+    """
+    Calculates the hybrid predicted rating for a given user and movie using a combination of collaborative filtering,
+    content-based filtering, and weighted scoring.
+
+    Args:
+        userId (int): The ID of the user.
+        movieId (int): The ID of the movie.
+        model (AlgoBase): The collaborative filtering model.
+        similarity_matrix (np.ndarray): The cosine similarity matrix for content-based filtering.
+        movies_df (pd.DataFrame): The DataFrame containing movie information.
+        weighted_df (pd.DataFrame): The DataFrame containing weighted scores for movies.
+
+    Returns:
+        float: The hybrid predicted rating for the given user and movie.
+    """
+    collaborative_rating = get_collaborative_rating(userId, movieId, model)
+    content_rating = get_content_based_rating(
+        userId, movieId, similarity_matrix, movies_df, model
+    )
+    weighted_score = get_weighted_score(movieId, movies_df, weighted_df)
+
+    final_rating = (
+        (0.5 * collaborative_rating) + (0.2 * content_rating) + (0.3 * weighted_score)
+    )
+    return final_rating
