@@ -178,9 +178,29 @@ def get_content_based_rating(
 
 
 def get_weighted_score(
-    movieId: int, movies_df: pd.DataFrame, weighted_df: pd.DataFrame
+    movieId: int,
+    movies_df: pd.DataFrame,
+    weighted_df: pd.DataFrame,
+    default_score: float = 0,
 ):
-    return weighted_df.loc[movies_df.loc[movieId, "id"], "score"]
+    """
+    Calculate the weighted score for a given movie.
+
+    Parameters:
+    - movieId (int): The ID of the movie.
+    - movies_df (pd.DataFrame): The DataFrame containing movie information.
+    - weighted_df (pd.DataFrame): The DataFrame containing weighted scores.
+    - default_score (float): The default score to return if the movie ID is not found.
+
+    Returns:
+    - float: The weighted score of the movie, or the default score if the movie ID is not found.
+    """
+    return (
+        weighted_df.loc[movies_df.loc[movieId, "id"], "score"]
+        if movieId in movies_df.index
+        and movies_df.loc[movieId, "id"] in weighted_df.index
+        else default_score
+    )
 
 
 def hybrid_predicted_rating(
@@ -216,3 +236,4 @@ def hybrid_predicted_rating(
         (0.5 * collaborative_rating) + (0.2 * content_rating) + (0.3 * weighted_score)
     )
     return final_rating
+
