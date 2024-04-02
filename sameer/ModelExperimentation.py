@@ -236,4 +236,3 @@ def hybrid_predicted_rating(
         (0.5 * collaborative_rating) + (0.2 * content_rating) + (0.3 * weighted_score)
     )
     return final_rating
-
