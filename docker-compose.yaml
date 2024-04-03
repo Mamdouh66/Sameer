@@ -2,7 +2,7 @@ services:
   app:
     build: .
     container_name: sameer
-    command: uvicorn sameer.main:app --host 0.0.0.0 --port 80 --reload --reload-include *
+    command: uvicorn Sameer.main:app --host 0.0.0.0 --port 80 --reload --reload-include *
     ports:
       - 8000:80
     volumes:

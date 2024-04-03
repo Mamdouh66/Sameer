@@ -13,8 +13,8 @@ WORKDIR /app
 
 COPY poetry.lock pyproject.toml ./
 
-COPY sameer ./sameer
+COPY Sameer ./Sameer
 
 RUN poetry install
 
-ENTRYPOINT [ "uvicorn", "sameer.main:app", "--host", "0.0.0.0", "--port", "80"]
+CMD [ "uvicorn", "Sameer.main:app", "--host", "0.0.0.0", "--port", "80", "--reload", "--reload-include", "*"]
