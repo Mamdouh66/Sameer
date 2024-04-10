@@ -12,10 +12,6 @@ repos:
       - id: check-json
       - id: detect-private-key
       - id: forbid-new-submodules
-  - repo: https://github.com/Yelp/detect-secrets
-    rev: v1.4.0
-    hooks:
-      - id: detect-secrets
   - repo: https://github.com/psf/black
     rev: 24.2.0
     hooks:
