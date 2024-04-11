@@ -8,7 +8,8 @@ from qdrant_client.conversions import common_types as types
 from llama_index.embeddings.openai import OpenAIEmbedding
 
 
-def get_qdrant_client() -> QdrantClient:
+def get_qdrant_client() -> QdrantClient | None:
+    client = None
     try:
         client = QdrantClient(
             url=settings.QDRANT_URL,
@@ -16,7 +17,6 @@ def get_qdrant_client() -> QdrantClient:
         )
     except Exception as e:
         print(f"Error while connecting to qdrant: {e}")
-        client = None
     return client
 
 
@@ -77,10 +77,10 @@ def search_vectordb(
     query_vector: list[float],
     returned_vectors: int = 5,
     collection_name: str = "movies_metadata",
-):
+) -> list[types.ScoredPoint]:
     client = get_qdrant_client()  # TODO: Make it use dependancy injection
     response = client.search(
-        collection_name="movies_metadata",
+        collection_name=collection_name,
         query_vector=query_vector,
         limit=returned_vectors,
     )
