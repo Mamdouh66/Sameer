@@ -12,5 +12,9 @@ class Settings(BaseSettings):
     QDRANT_API_KEY: str = os.getenv("QDRANT_API_KEY")
     QDRANT_URL: str = os.getenv("QDRANT_URL")
 
+    ID_MAPPING_DATASET_PATH: str = (
+        "/Users/mamdouh/Developer/filmora/data/id_to_imdb_id.csv"  # TODO: TO VM settings
+    )
+
 
 settings = Settings()

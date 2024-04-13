@@ -1,6 +1,9 @@
 import numpy as np
 import pandas as pd
+import polars as pl
 import ast
+
+from Sameer.config import settings
 
 
 def extend_list_from_column(df, column_name, target_list, key="name"):
@@ -94,3 +97,17 @@ def create_bag_of_words(cols):
     return " ".join(
         cols["keywords"] + cols["cast"] + [cols["director"]] + cols["genres"]
     )
+
+
+def get_id_to_imdb_mapping(movie_id: int) -> str | None:
+    try:
+        ids = pl.read_csv(settings.ID_MAPPING_DATASET_PATH)
+        imdb_id = ids.filter(pl.col("id") == movie_id)["imdb_id"]
+        final_imdb_id = imdb_id[0] if len(imdb_id) else None
+    except pl.exceptions.NoRowsReturnedError as enr:
+        print(f"Rows were not found, error: {enr}")
+        return None
+    except pl.exceptions.PolarsError as epe:
+        print(f"An error with Polars occoured, error: {epe}")
+        return None
+    return final_imdb_id
